@@ -477,7 +477,7 @@ def _flattenNestedSequences(nestedSequences: Iterator[SpeechSequence]) -> Iterat
 def _getCancellableEvent(
 		obj,
 		reason: controlTypes.OutputReason
-) -> Optional[commands.CancelableSpeechCommand]:
+) -> Optional[commands.CancellableSpeechCommand]:
 	if reason != controlTypes.REASON_FOCUS or not manager.shouldCancelExpiredFocusEvents():
 		return None
 	from NVDAObjects import NVDAObject
@@ -501,7 +501,7 @@ def _getCancellableEvent(
 
 		return hasFocusNow or (not previouslyHadFocus and ancestorHasFocusNow)
 
-	return commands.CancelableSpeechCommand(checkIfValid)
+	return commands.CancellableSpeechCommand(checkIfValid)
 
 
 # C901 'getObjectSpeech' is too complex

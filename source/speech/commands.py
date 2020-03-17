@@ -25,7 +25,7 @@ class SpeechCommand(object):
 	"""
 
 
-class CancelableSpeechCommand(SpeechCommand):
+class CancellableSpeechCommand(SpeechCommand):
 	"""
 	A command that allows cancelling the utterance that contains it.
 	"""

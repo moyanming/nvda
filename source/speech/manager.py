@@ -15,7 +15,7 @@ from .commands import (
 	BaseCallbackCommand,
 	ConfigProfileTriggerCommand,
 	IndexCommand,
-	CancelableSpeechCommand,
+	CancellableSpeechCommand,
 )
 from .commands import (  # noqa: F401
 	# F401 imported but unused:
@@ -156,7 +156,7 @@ class SpeechManager(object):
 	Note:
 	All of this activity is (and must be) synchronized and serialized on the main thread.
 	"""
-	_cancelableSpeechCallbacks: Dict[CancelableSpeechCommand, Callable[[CancelableSpeechCommand, ], None]]
+	_cancelableSpeechCallbacks: Dict[CancellableSpeechCommand, Callable[[CancellableSpeechCommand, ], None]]
 	_priQueues: Dict[Any, _ManagerPriorityQueue]
 	_curPriQueue: Optional[_ManagerPriorityQueue]
 
@@ -374,18 +374,25 @@ class SpeechManager(object):
 			return []
 		return utterance
 
-	def _checkForCancellations(self, utterance: SpeechSequence):
+	def _checkForCancellations(self, utterance: SpeechSequence) -> bool:
+		"""
+		Checks utterance to ensure it is not cancelled (via a CancellableSpeechCommand).
+		Because synthesizers do not expect CancellableSpeechCommands, they are removed from the utterance.
+		:arg utterance: The utterance to check for cancellations. Modified in place, CancellableSpeechCommands are
+		removed.
+		:return True if sequence is still valid, else False
+		"""
 		if not shouldCancelExpiredFocusEvents():
 			return True
 		utteranceIndex = self._getUtteranceIndex(utterance)
 		if utteranceIndex is None:
-			log.error("no utterance index, cant save cancelable commands")
+			log.error("no utterance index, cant save cancellable commands")
 			return False
-		cancelableItems = list(
-			item for item in reversed(utterance) if isinstance(item, CancelableSpeechCommand)
+		cancellableItems = list(
+			item for item in reversed(utterance) if isinstance(item, CancellableSpeechCommand)
 		)
-		for item in cancelableItems:
-			utterance.remove(item)  # CancelableSpeechCommands should not be sent to the synthesizer.
+		for item in cancellableItems:
+			utterance.remove(item)  # CancellableSpeechCommands should not be sent to the synthesizer.
 			if item.isCancelled:
 				log.debug(f"item already cancelled, canceling up to: {utteranceIndex}")
 				self._handleIndex(utteranceIndex)
@@ -474,7 +481,7 @@ class SpeechManager(object):
 			if log.isEnabledFor(log.DEBUG) and shouldCancelExpiredFocusEvents():
 				# Debug logging for cancelling expired focus events.
 				for item in seq:
-					if isinstance(item, CancelableSpeechCommand):
+					if isinstance(item, CancellableSpeechCommand):
 						log.debug(
 							f"Item is in _cancelCommandsForUtteranceBeingSpokenBySynth: "
 							f"{item in self._cancelCommandsForUtteranceBeingSpokenBySynth.keys()}"
