@@ -201,14 +201,18 @@ class SpeechManager(object):
 		self._cancelCommandsForUtteranceBeingSpokenBySynth = {}
 
 	def speak(self, speechSequence: SpeechSequence, priority: Spri):
+		log.debug(f"manager.speak: {speechSequence}")
 		# If speech isn't already in progress, we need to push the first speech.
 		push = self._curPriQueue is None
 		interrupt = self._queueSpeechSequence(speechSequence, priority)
 		if interrupt:
+			log.debug("interrupting speech")
 			getSynth().cancel()
 			push = True
 		if push:
+			log.debug("pushing next speech")
 			self._pushNextSpeech(True)
+		log.debug("not pushing speech")
 
 	def _queueSpeechSequence(self, inSeq: SpeechSequence, priority: Spri):
 		"""
@@ -216,9 +220,16 @@ class SpeechManager(object):
 		@rtype: bool
 		"""
 		outSeq = self._processSpeechSequence(inSeq)
+		log.debug(f"Out Seq: {outSeq}")
 		queue = self._priQueues.get(priority)
+		log.debug(
+			f"Current priority: {priority}, queLen: "
+			f"{0 if queue is None else len(queue.pendingSequences)}"
+		)
 		if not queue:
 			queue = self._priQueues[priority] = _ManagerPriorityQueue(priority)
+		else:
+			log.debug(f"current queue: {queue.pendingSequences}")
 		first = len(queue.pendingSequences) == 0
 		queue.pendingSequences.extend(outSeq)
 		if priority is Spri.NOW and first:
@@ -299,6 +310,7 @@ class SpeechManager(object):
 		queue = self._getNextPriority()
 		if not queue:
 			# No more speech.
+			log.debug("no more speech")
 			self._curPriQueue = None
 			return
 		if not self._curPriQueue:
@@ -409,7 +421,9 @@ class SpeechManager(object):
 		latestCanceledUtteranceIndex = None
 		log.debug(
 			f"Length of _cancelCommandsForUtteranceBeingSpokenBySynth: "
-			f"{len(self._cancelCommandsForUtteranceBeingSpokenBySynth.keys())}"
+			f"{len(self._cancelCommandsForUtteranceBeingSpokenBySynth.keys())} "
+			f"Length of _indexesSpeaking: "
+			f"{len(self._indexesSpeaking)} "
 		)
 		for command, index in self._cancelCommandsForUtteranceBeingSpokenBySynth.items():
 			if command.isCancelled:
@@ -418,6 +432,7 @@ class SpeechManager(object):
 					latestCanceledUtteranceIndex = index
 		log.debug(f"Last index: {latestCanceledUtteranceIndex}")
 		if latestCanceledUtteranceIndex is not None:
+			log.debug(f"Cancel and push speech")
 			getSynth().cancel()
 			self._handleIndex(latestCanceledUtteranceIndex)
 
@@ -460,6 +475,7 @@ class SpeechManager(object):
 					break # Found it!
 		else:
 			# Unknown index. Probably from a previous utterance which was cancelled.
+			log.debug("unknown index. Probably from a previous utterance which was cancelled")
 			return False, False
 		if endOfUtterance:
 			# These params may not apply to the next utterance if it was queued separately,
@@ -491,6 +507,7 @@ class SpeechManager(object):
 		return True, endOfUtterance
 
 	def _handleIndex(self, index: int):
+		log.debug(f"Handle index: {index}")
 		# A synth (such as OneCore) may skip indexes
 		# If before another index, with no text content in between.
 		# Therefore, detect this and ensure we handle all skipped indexes.
@@ -532,6 +549,7 @@ class SpeechManager(object):
 		queueHandler.queueFunction(queueHandler.eventQueue, self._handleDoneSpeaking)
 
 	def _handleDoneSpeaking(self):
+		log.debug(f"Synth done speaking, should push: {self._shouldPushWhenDoneSpeaking}")
 		if self._shouldPushWhenDoneSpeaking:
 			self._shouldPushWhenDoneSpeaking = False
 			self._pushNextSpeech(True)
