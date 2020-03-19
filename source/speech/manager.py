@@ -203,6 +203,7 @@ class SpeechManager(object):
 	def speak(self, speechSequence: SpeechSequence, priority: Spri):
 		log.debug(f"manager.speak: {speechSequence}")
 		interrupt = self._queueSpeechSequence(speechSequence, priority)
+		self.removeCancelledSpeechCommands()
 		# If speech isn't already in progress, we need to push the first speech.
 		push = self._curPriQueue is None or 1 > len(self._indexesSpeaking)
 		if interrupt:
@@ -438,6 +439,7 @@ class SpeechManager(object):
 			getSynth().cancel()
 			self._cancelCommandsForUtteranceBeingSpokenBySynth.clear()
 			self._indexesSpeaking.clear()
+			self._pushNextSpeech(True)
 
 	def _getUtteranceIndex(self, utterance: SpeechSequence):
 		#  find the index command, should be the last in sequence
