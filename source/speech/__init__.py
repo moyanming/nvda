@@ -485,7 +485,6 @@ def _getCancellableEvent(
 		log.warning("Unhandled object type. Expected all objects to be descendant from NVDAObject")
 		return None
 
-	from eventHandler import lastQueuedFocusObject
 	previouslyHadFocus: bool = getattr(
 		obj,
 		"wasGainFocusObj",

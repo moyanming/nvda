@@ -705,7 +705,7 @@ the NVDAObject for IAccessible
 		@return: C{True} if the focus event should be allowed.
 		@rtype: bool
 		"""
-		#this object or one of its ancestors must have state_focused.
+		# this object or one of its ancestors must have state_focused.
 		indirectionsToFocus = self._getIndirectionsToParentWithFocus()
 		return indirectionsToFocus is not None
 
