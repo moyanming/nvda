@@ -39,7 +39,11 @@ class CancellableSpeechCommand(SpeechCommand):
 	@property
 	def isCancelled(self):
 		log.debug(f"Check if valid {self}, isCanceled: {self._isCancelled}, isValid: {self._checkIfValid()}")
-		return self._isCancelled or not self._checkIfValid()
+		if self._isCancelled:
+			return True
+		elif not self._checkIfValid():
+			self._isCancelled = True
+		return self._isCancelled
 
 	def cancelUtterance(self):
 		self._isCancelled = True
