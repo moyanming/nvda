@@ -208,6 +208,8 @@ class SpeechManager(object):
 		if interrupt:
 			log.debug("interrupting speech")
 			getSynth().cancel()
+			self._indexesSpeaking.clear()
+			self._cancelCommandsForUtteranceBeingSpokenBySynth.clear()
 			push = True
 		if push:
 			log.debug("pushing next speech")
@@ -433,6 +435,8 @@ class SpeechManager(object):
 		if latestCanceledUtteranceIndex is not None:
 			log.debug(f"Cancel and push speech")
 			getSynth().cancel()
+			self._cancelCommandsForUtteranceBeingSpokenBySynth.clear()
+			self._indexesSpeaking.clear()
 			self._handleIndex(latestCanceledUtteranceIndex)
 
 	def _getUtteranceIndex(self, utterance: SpeechSequence):
