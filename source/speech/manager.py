@@ -384,7 +384,7 @@ class SpeechManager(object):
 			utterance.extend(seq)
 		# if any items are cancelled, cancel the whole utterance.
 		if utterance and not self._checkForCancellations(utterance):
-			return []
+			return self._buildNextUtterance()
 		return utterance
 
 	def _checkForCancellations(self, utterance: SpeechSequence) -> bool:
