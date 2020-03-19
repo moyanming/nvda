@@ -383,7 +383,7 @@ class SpeechManager(object):
 				break
 			utterance.extend(seq)
 		# if any items are cancelled, cancel the whole utterance.
-		if not self._checkForCancellations(utterance):
+		if utterance and not self._checkForCancellations(utterance):
 			return []
 		return utterance
 
