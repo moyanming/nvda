@@ -485,23 +485,22 @@ def _getCancellableEvent(
 		log.warning("Unhandled object type. Expected all objects to be descendant from NVDAObject")
 		return None
 
-	from NVDAObjects.IAccessible.ia2Web import Ia2Web
-	if not isinstance(obj, Ia2Web):
-		return None
-	obj: Ia2Web = obj
+	from eventHandler import lastQueuedFocusObject
+	previouslyHadFocus: bool = getattr(
+		obj,
+		"wasGainFocusObj",
+		False
+	)
 
-	focusInfo = obj.getFocusInfo()
+	def isSpeechStillValid():
+		from eventHandler import lastQueuedFocusObject
+		isLastFocusObj: bool = obj is lastQueuedFocusObject
+		stillValid = isLastFocusObj or not previouslyHadFocus
 
-	def checkIfValid():
-		log.debug("checked if valid, speakObjectProperties")
-		newFocusInfo = obj.getFocusInfo()
-		hasFocusNow: bool = newFocusInfo['stateFocused']
-		previouslyHadFocus: bool = focusInfo['stateFocused']
-		ancestorHasFocusNow: bool = newFocusInfo['indirectionsToAncestor'] != None
+		log.debug(f"checked if valid (isLast: {isLastFocusObj}, previouslyHad: {previouslyHadFocus}): {obj.name}")
+		return stillValid
 
-		return hasFocusNow or (not previouslyHadFocus and ancestorHasFocusNow)
-
-	return commands.CancellableSpeechCommand(checkIfValid)
+	return commands.CancellableSpeechCommand(isSpeechStillValid)
 
 
 # C901 'getObjectSpeech' is too complex

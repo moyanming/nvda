@@ -36,6 +36,7 @@ def queueEvent(eventName,obj,**kwargs):
 	global lastQueuedFocusObject
 	if eventName=="gainFocus":
 		lastQueuedFocusObject=obj
+	setattr(obj, "wasGainFocusObj", obj is lastQueuedFocusObject)
 	with _pendingEventCountsLock:
 		_pendingEventCountsByName[eventName]=_pendingEventCountsByName.get(eventName,0)+1
 		_pendingEventCountsByObj[obj]=_pendingEventCountsByObj.get(obj,0)+1
