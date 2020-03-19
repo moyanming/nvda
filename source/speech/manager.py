@@ -497,7 +497,7 @@ class SpeechManager(object):
 		toRemove = self._curPriQueue.pendingSequences[:seqIndex + 1]
 		for seq in toRemove:
 			log.debug(f"Removing: {seq}")
-			if log.isEnabledFor(log.DEBUG) and shouldCancelExpiredFocusEvents():
+			if shouldCancelExpiredFocusEvents():
 				# Debug logging for cancelling expired focus events.
 				for item in seq:
 					if isinstance(item, CancellableSpeechCommand):
@@ -505,6 +505,7 @@ class SpeechManager(object):
 							f"Item is in _cancelCommandsForUtteranceBeingSpokenBySynth: "
 							f"{item in self._cancelCommandsForUtteranceBeingSpokenBySynth.keys()}"
 						)
+						self._cancelCommandsForUtteranceBeingSpokenBySynth.pop(item, None)
 			self._curPriQueue.pendingSequences.remove(seq)
 
 		return True, endOfUtterance
