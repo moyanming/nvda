@@ -259,8 +259,8 @@ class SpeechManager(object):
 				return seq
 			if not isinstance(lastCommand, IndexCommand):
 				# Add an index so we know when we've reached the end of this utterance.
-				speechIndex = next(self._indexCounter)
-				lastOutSeq.append(IndexCommand(speechIndex))
+				reachedIndex = next(self._indexCounter)
+				lastOutSeq.append(IndexCommand(reachedIndex))
 			outSeqs.append([EndUtteranceCommand()])
 			return seq
 
