@@ -53,6 +53,9 @@ class CancellableSpeechCommand(SpeechCommand):
 		"""Overridable behavior."""
 		return True
 
+	def __repr__(self):
+		return f"CancellableSpeech ({ 'cancelled' if self._isCancelled else 'still valid' })"
+
 
 class SynthCommand(SpeechCommand):
 	"""Commands that can be passed to synth drivers.
