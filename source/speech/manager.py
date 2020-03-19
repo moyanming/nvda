@@ -408,7 +408,7 @@ class SpeechManager(object):
 			utterance.remove(item)  # CancellableSpeechCommands should not be sent to the synthesizer.
 			if item.isCancelled:
 				log.debug(f"item already cancelled, canceling up to: {utteranceIndex}")
-				self._handleIndex(utteranceIndex)
+				self._removeCompletedFromQueue(utteranceIndex)
 				return False
 			else:
 				item._utteranceIndex = utteranceIndex
@@ -434,10 +434,10 @@ class SpeechManager(object):
 		log.debug(f"Last index: {latestCanceledUtteranceIndex}")
 		if latestCanceledUtteranceIndex is not None:
 			log.debug(f"Cancel and push speech")
+			self._removeCompletedFromQueue(latestCanceledUtteranceIndex)
 			getSynth().cancel()
 			self._cancelCommandsForUtteranceBeingSpokenBySynth.clear()
 			self._indexesSpeaking.clear()
-			self._handleIndex(latestCanceledUtteranceIndex)
 
 	def _getUtteranceIndex(self, utterance: SpeechSequence):
 		#  find the index command, should be the last in sequence
