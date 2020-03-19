@@ -202,9 +202,9 @@ class SpeechManager(object):
 
 	def speak(self, speechSequence: SpeechSequence, priority: Spri):
 		log.debug(f"manager.speak: {speechSequence}")
-		# If speech isn't already in progress, we need to push the first speech.
-		push = self._curPriQueue is None
 		interrupt = self._queueSpeechSequence(speechSequence, priority)
+		# If speech isn't already in progress, we need to push the first speech.
+		push = self._curPriQueue is None or 1 > len(self._indexesSpeaking)
 		if interrupt:
 			log.debug("interrupting speech")
 			getSynth().cancel()
