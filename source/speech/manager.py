@@ -214,10 +214,9 @@ class SpeechManager(object):
 			self._pushNextSpeech(True)
 		log.debug("not pushing speech")
 
-	def _queueSpeechSequence(self, inSeq: SpeechSequence, priority: Spri):
+	def _queueSpeechSequence(self, inSeq: SpeechSequence, priority: Spri) -> bool:
 		"""
 		@return: Whether to interrupt speech.
-		@rtype: bool
 		"""
 		outSeq = self._processSpeechSequence(inSeq)
 		log.debug(f"Out Seq: {outSeq}")
